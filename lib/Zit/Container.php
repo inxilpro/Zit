@@ -53,7 +53,17 @@ class Container
 	{
 		// Return object if it's already instantiated
 		if (isset($this->_objects[$name])) {
-			return $this->_objects[$name];
+			$args = func_get_args();
+			array_shift($args);
+			
+			$key = $this->_keyForArguments($args);
+			if ('_no_arguments' == $key && !isset($this->_objects[$name][$key]) && !empty($this->_objects[$name])) {
+				$key = key($this->_objects[$name]);
+			}
+			
+			if (isset($this->_objects[$name][$key])) {
+				return $this->_objects[$name][$key];
+			}
 		}
 		
 		// Otherwise create a new one
@@ -68,18 +78,33 @@ class Container
 		
 		$arguments = func_get_args();
 		$arguments[0] = $this;
-		$this->_objects[$name] = call_user_func_array($this->_callbacks[$name], $arguments);
-		return $this->_objects[$name];
+		$key = $this->_keyForArguments($arguments);
+		$this->_objects[$name][$key] = call_user_func_array($this->_callbacks[$name], $arguments);
+		return $this->_objects[$name][$key];
 	}
 	
 	public function delete($name)
 	{
+		// TODO: Should this also delete the callback?
 		if (isset($this->_objects[$name])) {
 			unset($this->_objects[$name]);
 			return true;
 		}
 		
 		return false;
+	}
+	
+	protected function _keyForArguments(Array $arguments)
+	{
+		if (count($arguments) && $this === $arguments[0]) {
+			array_shift($arguments);
+		}
+		
+		if (0 == count($arguments)) {
+			return '_no_arguments';
+		}
+		
+		return md5(serialize($arguments));
 	}
 }
 

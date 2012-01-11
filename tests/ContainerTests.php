@@ -109,6 +109,15 @@ class ContainerTests extends PHPUnit_Framework_TestCase
 		$this->assertNotSame($o4, $o5);
 	}
 	
+	/*
+	public function testDelete()
+	{
+		$c = $this->container;
+		$c->setObj(function() { return new \stdClass(); });
+		$c->deleteObj();
+	}
+	*/
+	
 	public function testDependency()
 	{
 		$c = $this->container;
@@ -140,10 +149,12 @@ class ContainerTests extends PHPUnit_Framework_TestCase
 		$o1 = $c->getTestObj('A');
 		$o2 = $c->getTestObj();
 		$o3 = $c->newTestObj('B');
+		$o4 = $c->getTestObj('A');
 		
 		$this->assertAttributeEquals('A', 'name', $o1);
 		$this->assertAttributeEquals('A', 'name', $o2);
 		$this->assertAttributeEquals('B', 'name', $o3);
+		$this->assertSame($o1, $o4);
 	}
 	
 	public function testAlternateMethodFormat()
