@@ -1,0 +1,26 @@
+{
+	"name": "inxilpro/Zit",
+	"description": "Zit is a simple dependency injector based heavily on Pimple. It aims to provide the same simplicity as Pimple while offering a slightly more robust object interface.",
+	"version": "1.1.0",
+	"type": "library",
+	"keywords": ["dependency injection", "dependency", "di", "container", "zit", "pimple"],
+	"homepage": "https://github.com/inxilpro/Zit",
+	"license": "MIT",
+	"authors": [{
+		"name": "Chris Morrell",
+		"homepage": "http://cmorrell.com/"
+	}],
+	"support": {
+		"issues": "https://github.com/inxilpro/Zit/issues"
+	},
+	"autoload": {
+        "psr-0": { "Zit\\": "lib/Zit" }
+    },
+	"require": {
+		"php": ">=5.3.0"
+	},
+    "repositories": [{
+        "type": "vcs",
+        "url": "https://github.com/inxilpro/Zit"
+    }]
+}
