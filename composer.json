@@ -1,5 +1,5 @@
 {
-	"name": "inxilpro/Zit",
+	"name": "inxilpro/zit",
 	"description": "Zit is a simple dependency injector based heavily on Pimple. It aims to provide the same simplicity as Pimple while offering a slightly more robust object interface.",
 	"version": "1.1.0",
 	"type": "library",
