@@ -26,8 +26,8 @@ $container->set('auth', function() {
 });
 ?>
 ```
-	
-All instantiation functions are passed the container as the first argument, making 
+
+All instantiation functions are passed the container as the first argument, making
 dependency injection possible:
 
 ```php
@@ -46,7 +46,16 @@ $container->setAuth(function() { // ... }); // Or:
 $container->set_auth(function() { // ... });
 ?>
 ```
-	
+
+By default, dependency instances are cached.  You can force a dependency to always return a new instance by defining it with the factory method.
+
+```php
+<?php
+$container->set('db', $container->factory(function ($container) {
+        return new Db($container);
+}));
+```
+
 ## Getting Objects
 
 Getting objects are as simple as:
