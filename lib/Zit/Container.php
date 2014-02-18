@@ -6,7 +6,16 @@ class Container
 {
 	protected $_objects = array();
 	protected $_callbacks = array();
-	
+	/** @var \SplObjectStorage */
+	protected $factories;
+
+	/**
+	 * Instantiate the container
+	 */
+	public function __construct() {
+		$this->factories = new \SplObjectStorage();
+	}
+
 	public function __call($name, $arguments = array())
 	{
 		// Parse function name
@@ -32,6 +41,18 @@ class Container
 		throw new \InvalidArgumentException(sprintf('Methood "%s" does not exist.', $method));
 	}
 	
+	/**
+	 * Define a Closure as a dependency factory. {@link get()} method will always invoke the callable.
+	 *
+	 * @param \Closure $callable An invokable that returns an object
+	 * @return \Closure
+	 */
+	public function factory(\Closure $callable) {
+		$this->factories->attach($callable);
+
+		return $callable;
+	}
+
 	public function set($name, \Closure $callable)
 	{
 		$this->_callbacks[$name] = $callable;
@@ -78,9 +99,13 @@ class Container
 		
 		$arguments = func_get_args();
 		$arguments[0] = $this;
-		$key = $this->_keyForArguments($arguments);
-		$this->_objects[$name][$key] = call_user_func_array($this->_callbacks[$name], $arguments);
-		return $this->_objects[$name][$key];
+		$object = call_user_func_array($this->_callbacks[$name], $arguments);
+		if (!isset($this->factories[$this->_callbacks[$name]])) {
+			// Cache the result if the dependency isn't a factory
+			$key = $this->_keyForArguments($arguments);
+			$this->_objects[$name][$key] = $object;
+		}
+		return $object;
 	}
 	
 	public function delete($name)
