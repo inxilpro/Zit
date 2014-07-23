@@ -12,7 +12,7 @@ class Container
 	{
 		// Parse function name
 		preg_match_all('/_?([A-Z][a-z0-9]*|[a-z0-9]+)/', $name, $parts);
-		$parts = $parts[1];
+		$parts = array_map('strtolower', $parts[1]);
 		
 		// Determine method
 		$method = array_shift($parts);		
@@ -27,7 +27,7 @@ class Container
 		}
 		
 		// Determine object key
-		$key = strtolower(implode('_', $parts));
+		$key = implode('_', $parts);
 		array_unshift($arguments, $key);
 		
 		// Call method if exists
