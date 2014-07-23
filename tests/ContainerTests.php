@@ -108,6 +108,29 @@ class ContainerTests extends PHPUnit_Framework_TestCase
 		
 		$this->assertNotSame($o4, $o5);
 	}
+
+	public function testFactory()
+	{
+		$c = $this->container;
+		
+		$c->setObjFactory(function($c, $name) {
+			return new \Zit\TestObj($name);
+		});
+		
+		$o1 = $c->newObj('pizza');
+		$o2 = $c->newObj('pizza');
+		
+		$this->assertNotSame($o1, $o2);
+		
+		$c->setFactory('obj2', function($c, $name) {
+			return new \Zit\TestObj($name);
+		});
+
+		$o3 = $c->newObj2('pizza');
+		$o4 = $c->newObj2('pizza');
+		
+		$this->assertNotSame($o3, $o4);
+	}
 	
 	/*
 	public function testDelete()

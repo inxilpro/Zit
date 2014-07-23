@@ -6,6 +6,7 @@ class Container
 {
 	protected $_objects = array();
 	protected $_callbacks = array();
+	protected $_factories = array();
 	
 	public function __call($name, $arguments = array())
 	{
@@ -17,6 +18,12 @@ class Container
 		$method = array_shift($parts);		
 		if ('new' == $method) {
 			$method = 'fresh';
+		}
+
+		// Handle 'Factory' alternative
+		if ('set' == $method && 'factory' == end($parts)) {
+			array_pop($parts);
+			$method = 'setFactory';
 		}
 		
 		// Determine object key
@@ -42,6 +49,12 @@ class Container
 		$this->set($name, function() use ($param) {
 			return $param;
 		});
+	}
+
+	public function setFactory($name, \Closure $callable)
+	{
+		$this->_factories[$name] = true;
+		return $this->set($name, $callable);
 	}
 	
 	public function has($name)
@@ -79,8 +92,14 @@ class Container
 		$arguments = func_get_args();
 		$arguments[0] = $this;
 		$key = $this->_keyForArguments($arguments);
-		$this->_objects[$name][$key] = call_user_func_array($this->_callbacks[$name], $arguments);
-		return $this->_objects[$name][$key];
+		$obj = call_user_func_array($this->_callbacks[$name], $arguments);
+
+		// Store object if it's not defined as a factory
+		if (!isset($this->_factories[$name])) {
+			$this->_objects[$name][$key] = $obj;
+		}
+
+		return $obj;
 	}
 	
 	public function delete($name)
