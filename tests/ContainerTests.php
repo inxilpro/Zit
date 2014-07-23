@@ -1,8 +1,8 @@
 <?php
 
-require_once '../lib/Zit/Container.php';
+require_once __DIR__ . '/../lib/Zit/Container.php';
 require_once 'TestObj.php';
-require_once 'PHPUnit/Framework/TestCase.php';
+require_once 'PHPUnit/TestCase.php';
 
 use Zit\Container;
 
