@@ -20,10 +20,13 @@ class Container
 			$method = 'fresh';
 		}
 
-		// Handle 'Factory' alternative
+		// Handle 'Factory' alternatives
 		if ('set' == $method && 'factory' == end($parts)) {
 			array_pop($parts);
 			$method = 'setFactory';
+		}
+		if ('delete' == $method && 'factory' == end($parts)) {
+			array_pop($parts);
 		}
 		
 		// Determine object key
@@ -104,13 +107,27 @@ class Container
 	
 	public function delete($name)
 	{
-		// TODO: Should this also delete the callback?
+		$deleted = false;
+
+		// Delete Objects
 		if (isset($this->_objects[$name])) {
 			unset($this->_objects[$name]);
-			return true;
+			$deleted = true;
+		}
+
+		// Delete Callbacks
+		if (isset($this->_callbacks[$name])) {
+			unset($this->_callbacks[$name]);
+			$deleted = true;
+		}
+
+		// Delete Factories
+		if (isset($this->_factories[$name])) {
+			unset($this->_factories[$name]);
+			$deleted = true;
 		}
 		
-		return false;
+		return $deleted;
 	}
 	
 	protected function _keyForArguments(Array $arguments)
