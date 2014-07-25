@@ -42,16 +42,22 @@ class Container
 		throw new \InvalidArgumentException(sprintf('Methood "%s" does not exist.', $method));
 	}
 	
-	public function set($name, \Closure $callable)
+	public function set($name, $callableOrStatic)
 	{
-		$this->_callbacks[$name] = $callable;
+		if (!is_callable($callableOrStatic)) {
+			$value = $callableOrStatic;
+			$callableOrStatic = function() use ($value) {
+				return $value;
+			};
+		}
+
+		$this->_callbacks[$name] = $callableOrStatic;
 	}
 	
 	public function setParam($name, $param)
 	{
-		$this->set($name, function() use ($param) {
-			return $param;
-		});
+		trigger_error('Zit::setParam() as been deprecated.  Use Zit::set() instead.', E_USER_NOTICE);
+		return call_user_func_array(array($this, 'set'), func_get_args());
 	}
 
 	public function setFactory($name, \Closure $callable)
