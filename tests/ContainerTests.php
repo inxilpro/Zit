@@ -50,9 +50,15 @@ class ContainerTests extends PHPUnit_Framework_TestCase
 	{
 		$c = $this->container;
 		
-		// Explicit Call Only
-		$c->setParam('test', 'testing');
+		$c->set('test', 'testing');
 		$this->assertEquals('testing', $c->get('test'));
+
+		$o = new \stdClass();
+		$c->set('test2', $o);
+		$this->assertSame($o, $c->get('test2'));
+
+		$c->setString('test3');
+		$this->assertEquals('test3', $c->get('string'));
 	}
 	
 	public function testGet()
@@ -131,14 +137,39 @@ class ContainerTests extends PHPUnit_Framework_TestCase
 		$this->assertNotSame($o3, $o4);
 	}
 	
-	/*
 	public function testDelete()
 	{
 		$c = $this->container;
 		$c->setObj(function() { return new \stdClass(); });
 		$c->deleteObj();
+
+		try {
+			$c->getObj();
+		} catch (\InvalidArgumentException $e) {
+			return;
+		}
+
+		$this->fail();
 	}
-	*/
+
+	public function testDeleteFactory()
+	{
+		$c = $this->container;
+		$c->setObjFactory(function() { return new \stdClass(); });
+
+		$a = $c->getObj();
+		$b = $c->getObj();
+
+		$this->assertNotSame($a, $b);
+
+		$c->deleteObj();
+		$c->setObj(function() { return new \stdClass(); });
+
+		$a = $c->getObj();
+		$b = $c->getObj();
+
+		$this->assertSame($a, $b);
+	}
 	
 	public function testDependency()
 	{
