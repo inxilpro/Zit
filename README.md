@@ -38,8 +38,8 @@ $container->set('auth', function($container) {
 Zit also provides convenient magic methods for setting instantiation functions:
 
 ```php
-$container->setAuth(function() { // ... }); // Or:
-$container->set_auth(function() { // ... });
+$container->setAuth(function() { /* ... */ }); // Or:
+$container->set_auth(function() { /* ... */ });
 ```
 	
 ## Getting Objects
