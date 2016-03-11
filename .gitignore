@@ -2,3 +2,5 @@
 .buildpath
 .project
 *.iml
+.idea
+vendor/

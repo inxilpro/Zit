@@ -131,6 +131,19 @@ class Container extends \Zit\Container
 
 ## Change Log
 
+### Version 3.0.0
+
+  - Implemented [Container Interoperability](https://github.com/container-interop/container-interop). Zit was already
+    `container-interop` compatible, but it now implements the interface and throws an exception that implements
+    `Interop\Container\Exception\NotFoundException` when a item is not found. This exception extends
+    `\InvalidArgumentException`, so 3.0.0 should be nearly 100% backwards-compatible, but I'm bumping the major version
+    just in case.
+  - Removed deprecated function `setParam`
+  - Fixed a typo in the exception message thrown from `__call` if a method does not exist
+  - `set()` is now fluent (returns the container for chaining)
+  - Switched to md4 hashing for speed improvements (we don't need the security of md5)
+  - Added DocBlocks throughout the code
+
 ### Version 2.0
 
   - Removed the `setParam` method in favor of checking whether the parameter passed to `set` is callable.

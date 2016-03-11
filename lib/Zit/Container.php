@@ -2,12 +2,38 @@
 
 namespace Zit;
 
-class Container
+use Interop\Container\ContainerInterface;
+use Zit\Exception\NotFoundException;
+
+/**
+ * Zit Container
+ *
+ * @package Zit
+ */
+class Container implements ContainerInterface
 {
+	/**
+	 * @var array Instantiated objects
+	 */
 	protected $_objects = array();
+
+	/**
+	 * @var array Instantiation functions
+	 */
 	protected $_callbacks = array();
+
+	/**
+	 * @var array Keys marked as factories (always return fresh)
+	 */
 	protected $_factories = array();
 	
+	/**
+	 * Handles magic methods
+	 *
+	 * @param $name
+	 * @param array $arguments
+	 * @return mixed
+	 */
 	public function __call($name, $arguments = array())
 	{
 		// Parse function name
@@ -39,9 +65,17 @@ class Container
 		}
 		
 		// Throw exception on miss
-		throw new \InvalidArgumentException(sprintf('Methood "%s" does not exist.', $method));
+		throw new \InvalidArgumentException(sprintf('Method "%s" does not exist.', $method));
 	}
 	
+	/**
+	 * Set an item in the container
+	 *
+	 * @param string $name Name of item
+	 * @param mixed $callableOrStatic If is callable, this will be set as the instantiation function for this $name,
+	 *                                otherwise, it will be used as the value ->get($name) returns
+	 * @return $this
+	 */
 	public function set($name, $callableOrStatic)
 	{
 		if (!is_callable($callableOrStatic)) {
@@ -52,25 +86,43 @@ class Container
 		}
 
 		$this->_callbacks[$name] = $callableOrStatic;
-	}
-	
-	public function setParam($name, $param)
-	{
-		trigger_error('Zit::setParam() as been deprecated.  Use Zit::set() instead.', E_USER_NOTICE);
-		return call_user_func_array(array($this, 'set'), func_get_args());
+		return $this;
 	}
 
-	public function setFactory($name, \Closure $callable)
+	/**
+	 * Set a factory in the container (always creates a fresh item)
+	 *
+	 * @param string $name
+	 * @param callable $callable
+	 * @return $this
+	 */
+	public function setFactory($name, callable $callable)
 	{
 		$this->_factories[$name] = true;
 		return $this->set($name, $callable);
 	}
 	
+	/**
+	 * Check to see if an item is set
+	 *
+	 * @param string $name
+	 * @return bool
+	 */
 	public function has($name)
 	{
 		return isset($this->_callbacks[$name]);
 	}
 	
+	/**
+	 * Get an item
+	 *
+	 * On first call, this will defer to fresh()
+	 * On all subsequent calls, this will return the already instantiated item (unless it was set as a factory)
+	 * All arguments after the first are passed to the instantiation function
+	 *
+	 * @param string $name
+	 * @return mixed
+	 */
 	public function get($name)
 	{
 		// Return object if it's already instantiated
@@ -92,10 +144,16 @@ class Container
 		return call_user_func_array(array($this, 'fresh'), func_get_args());
 	}
 	
+	/**
+	 * Get a new item (run instantiation function regardless of cache)
+	 *
+	 * @param string $name
+	 * @return mixed
+	 */
 	public function fresh($name)
 	{
 		if (!isset($this->_callbacks[$name])) {
-			throw new \InvalidArgumentException(sprintf('Callback for "%s" does not exist.', $name));
+			throw new NotFoundException(sprintf('Callback for "%s" does not exist.', $name));
 		}
 		
 		$arguments = func_get_args();
@@ -111,6 +169,12 @@ class Container
 		return $obj;
 	}
 	
+	/**
+	 * Delete an instantiation function & all associated objects
+	 *
+	 * @param string $name
+	 * @return bool
+	 */
 	public function delete($name)
 	{
 		$deleted = false;
@@ -136,6 +200,12 @@ class Container
 		return $deleted;
 	}
 	
+	/**
+	 * Generate a key for given arguments
+	 *
+	 * @param array $arguments
+	 * @return string
+	 */
 	protected function _keyForArguments(Array $arguments)
 	{
 		if (count($arguments) && $this === $arguments[0]) {
@@ -145,8 +215,9 @@ class Container
 		if (0 == count($arguments)) {
 			return '_no_arguments';
 		}
-		
-		return md5(serialize($arguments));
+
+		// md4 is slightly faster than md5
+		return hash('md4', serialize($arguments));
 	}
 }
 
