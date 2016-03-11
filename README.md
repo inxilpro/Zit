@@ -7,46 +7,39 @@
 
 Zit is a simple dependency injector based heavily on Pimple.  It aims to provide the same simplicity as Pimple while offering a slightly more robust object interface.
 
-## Usage
+## Installation
 
-Zit is simple to use.  Just include it and create a new container:
+Zit is available via Composer:
 
-```php
-<?php
-require_once '/path/to/lib/Zit/Container.php';
-$container = new \Zit\Container();
-?>
+```bash
+composer require inxilpro/zit
 ```
 
-## Defining Objects
+## Usage
 
-Like Pimple, objects are defined through anonymous functions that return an instance of the object:
+Zit is simple to use.  Like Pimple, objects are defined through anonymous functions that return an 
+instance of the object:
 
 ```php
-<?php
+$container = new \Zit\Container();
 $container->set('auth', function() {
 	return new Auth();
 });
-?>
 ```
 	
 All instantiation functions are passed the container as the first argument, making dependency injection possible:
 
 ```php
-<?php
 $container->set('auth', function($container) {
 	return new Auth($container->get('db'));
 });
-?>
 ```
 	
 Zit also provides convenient magic methods for setting instantiation functions:
 
 ```php
-<?php
 $container->setAuth(function() { // ... }); // Or:
 $container->set_auth(function() { // ... });
-?>
 ```
 	
 ## Getting Objects
@@ -54,42 +47,37 @@ $container->set_auth(function() { // ... });
 Getting objects are as simple as:
 
 ```php
-<?php
 $container->get('auth');
-?>
 ```
 	
 Or, if you prefer the shorthand:
 
 ```php
-<?php
 $container->getAuth(); // Or:
 $container->get_auth();
-?>
 ```
 	
 ## Getting Fresh Objects
 
-By default, all objects are shared in Zit.  That is, once an object is created, that same exact object is returned for each additional get().  If you need a fresh object, you can do so with:
+By default, all objects are shared in Zit.  That is, once an object is created, that same exact object is 
+returned for each additional get().  If you need a fresh object, you can do so with:
 
 ```php
-<?php
 $container->fresh('auth'); // Or:
 $container->freshAuth(); // Or:
 $container->fresh_auth(); // Or:
 $container->newAuth(); // Or:
 $container->new_auth();
-?>
 ```
 	
-Note the because the 'new' keyword is reserved, you can only use it if you're using the magic methods.
+> Note that because the 'new' keyword is reserved, you can only use it if you're using the magic methods.
 
 ## Constructor Parameters
 
-Sometimes you need to pass parameters to the constructor of an object, while still also injecting dependencies.  Zit automatically passes all parameters on to your instantiation function:
+Sometimes you need to pass parameters to the constructor of an object, while still also injecting 
+dependencies.  Zit automatically passes all parameters on to your instantiation function:
 
 ```php
-<?php
 $container->setUser(function($c, $id)) {
 	$user = new User($id);
 	$user->setDb($c->getDb());
@@ -97,7 +85,6 @@ $container->setUser(function($c, $id)) {
 });
 
 $user = $container->newUser(1);
-?>
 ```
 	
 ## Storing Non-Generators
@@ -105,31 +92,29 @@ $user = $container->newUser(1);
 You can also use Zit to store non-generators (strings/instantiated objects/etc). Just pass it instead of a generator:
 
 ```php
-<?php
 $container->set('api_key', 'abcd1234567890');
 $key = $container->get('api_key');
-?>
 ```
 
-**Please note:** You must wrap closures with a generator, if you want to closure returned rather than the return value of the closure.
+**Please note:** You must wrap closures/callables with a generator if you want the closure returned rather than the 
+return value of the closure.
 
 ## Custom Container
 
-Most projects will benefit from a custom container that sets up its own injection rules.  This is as simple as extending Zit:
+Most projects will benefit from a custom container that sets up its own injection rules.  This is as simple 
+as extending Zit:
 
 ```php
-<?php
 namespace MyApp\Di;
 
 class Container extends \Zit\Container
 {
 	public function __construct()
 	{
-		$this->setAuth(function() { // ... });
-		$this->setUser(function() { // ... });
+		$this->setAuth(function() { /* ... */ });
+		$this->setUser(function() { /* ... */ });
 	}
 }
-?>
 ```
 
 ## Change Log
