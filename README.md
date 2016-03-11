@@ -3,6 +3,7 @@
 [![Build Status](https://travis-ci.org/inxilpro/Zit.svg)](https://travis-ci.org/inxilpro/Zit)
 [![Packagist Version](https://img.shields.io/packagist/v/inxilpro/zit.svg)](https://packagist.org/packages/inxilpro/zit)
 [![GitHub Stars](https://img.shields.io/github/stars/inxilpro/Zit.svg)](https://github.com/inxilpro/Zit/stargazers)
+[![PHP 5.4+](https://img.shields.io/badge/php-%3E%3D5.4-yellowgreen.svg)](https://secure.php.net/releases/5_4_0.php)
 
 Zit is a simple dependency injector based heavily on Pimple.  It aims to provide the same simplicity as Pimple while offering a slightly more robust object interface.
 
@@ -140,6 +141,7 @@ class Container extends \Zit\Container
     `Interop\Container\Exception\NotFoundException` when a item is not found. This exception extends
     `\InvalidArgumentException`, so 3.0.0 should be nearly 100% backwards-compatible, but I'm bumping the major version
     just in case.
+  - Dropped support for PHP 5.3
   - Removed deprecated function `setParam`
   - `setFactory()` now accepts any `callable` instead of specifically a `Closure`
   - Fixed a typo in the exception message thrown from `__call` if a method does not exist

@@ -93,7 +93,7 @@ class Container implements ContainerInterface
 	 * Set a factory in the container (always creates a fresh item)
 	 *
 	 * @param string $name
-	 * @param callable $callable
+	 * @param \callable $callable
 	 * @return $this
 	 */
 	public function setFactory($name, callable $callable)
