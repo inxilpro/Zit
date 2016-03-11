@@ -141,6 +141,7 @@ class Container extends \Zit\Container
     `\InvalidArgumentException`, so 3.0.0 should be nearly 100% backwards-compatible, but I'm bumping the major version
     just in case.
   - Removed deprecated function `setParam`
+  - `setFactory()` now accepts any `callable` instead of specifically a `Closure`
   - Fixed a typo in the exception message thrown from `__call` if a method does not exist
   - `set()` is now fluent (returns the container for chaining)
   - Switched to md4 hashing for speed improvements (we don't need the security of md5)
