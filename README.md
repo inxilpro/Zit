@@ -60,7 +60,7 @@ $container->get_auth();
 ## Getting Fresh Objects
 
 By default, all objects are shared in Zit.  That is, once an object is created, that same exact object is 
-returned for each additional get().  If you need a fresh object, you can do so with:
+returned for each additional `get()`.  If you need a fresh object, you can do so with:
 
 ```php
 $container->fresh('auth'); // Or:
@@ -85,19 +85,22 @@ $container->setUser(function($c, $id)) {
 });
 
 $user = $container->newUser(1);
+
+// Parameters are taken into account when caching results:
+$user2 = $container->getUser(1); // $user2 === $user;
 ```
 	
-## Storing Non-Generators
+## Storing Static Content
 
-You can also use Zit to store non-generators (strings/instantiated objects/etc). Just pass it instead of a generator:
+You can also use Zit to store strings/objects/etc. Just pass it instead of a generator:
 
 ```php
 $container->set('api_key', 'abcd1234567890');
 $key = $container->get('api_key');
 ```
 
-**Please note:** You must wrap closures/callables with a generator if you want the closure returned rather than the 
-return value of the closure.
+**Please note:** You must wrap callables with an instantiation function if you want the callable 
+returned rather than the return value of the callable.
 
 ## Custom Container
 
