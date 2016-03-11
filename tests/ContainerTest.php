@@ -1,9 +1,9 @@
 <?php
 
-require_once __DIR__ . '/../lib/Zit/Container.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 require_once 'TestObj.php';
 
-use Zit\Container;
+use \Zit\Container;
 
 /**
  * Container test case.
@@ -20,7 +20,6 @@ class ContainerTests extends PHPUnit_Framework_TestCase
 	 */
 	protected function setUp()
 	{
-		parent::setUp();
 		$this->container = new Container();
 	}
 
@@ -30,7 +29,6 @@ class ContainerTests extends PHPUnit_Framework_TestCase
 	protected function tearDown()
 	{
 		$this->container = null;
-		parent::tearDown();
 	}
 	
 	public function testSetAndHas()
