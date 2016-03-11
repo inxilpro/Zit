@@ -3,6 +3,7 @@ language: php
 php:
   - 5.4
   - 5.5
+  - 7.0
   - hhvm
 
 before_script:
@@ -12,5 +13,6 @@ script: phpunit
 
 matrix:
   allow_failures:
+    - php: 7.0
     - php: hhvm
   fast_finish: true
