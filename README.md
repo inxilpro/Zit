@@ -1,6 +1,8 @@
 # Zit
 
 [![Build Status](https://travis-ci.org/inxilpro/Zit.svg)](https://travis-ci.org/inxilpro/Zit)
+[![Packagist Version](https://img.shields.io/packagist/v/inxilpro/zit.svg)](https://packagist.org/packages/inxilpro/zit)
+[![GitHub Stars](https://img.shields.io/github/stars/inxilpro/Zit.svg)](https://github.com/inxilpro/Zit/stargazers)
 
 Zit is a simple dependency injector based heavily on Pimple.  It aims to provide the same simplicity as Pimple while offering a slightly more robust object interface.
 
