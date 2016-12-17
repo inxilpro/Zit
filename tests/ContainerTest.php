@@ -139,9 +139,10 @@ class ContainerTests extends PHPUnit_Framework_TestCase
 	{
 		$c = $this->container;
 		$c->setObj(function() { return new \stdClass(); });
-		$c->deleteObj();
 
 		$this->assertInstanceOf(stdClass::class,$c->getObj());
+
+		$c->deleteObj();
 
 		try {
 			$c->getObj();
@@ -162,7 +163,7 @@ class ContainerTests extends PHPUnit_Framework_TestCase
 
 		$this->assertNotSame($a, $b);
 
-		$c->deleteObj();
+		$c->deleteObjFactory();
 		$c->setObj(function() { return new \stdClass(); });
 
 		$a = $c->getObj();
