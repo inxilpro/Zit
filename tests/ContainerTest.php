@@ -140,7 +140,7 @@ class ContainerTests extends PHPUnit_Framework_TestCase
 		$c = $this->container;
 		$c->setObj(function() { return new \stdClass(); });
 
-		$this->assertInstanceOf(stdClass::class,$c->getObj());
+		$this->assertInstanceOf('\\stdClass',$c->getObj());
 
 		$c->deleteObj();
 
@@ -249,4 +249,3 @@ class ContainerTests extends PHPUnit_Framework_TestCase
 		$c->somethingThatDoesNotExist();
 	}
 }
-
