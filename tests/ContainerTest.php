@@ -139,6 +139,9 @@ class ContainerTests extends PHPUnit_Framework_TestCase
 	{
 		$c = $this->container;
 		$c->setObj(function() { return new \stdClass(); });
+
+		$this->assertInstanceOf('\\stdClass',$c->getObj());
+
 		$c->deleteObj();
 
 		try {
@@ -160,7 +163,7 @@ class ContainerTests extends PHPUnit_Framework_TestCase
 
 		$this->assertNotSame($a, $b);
 
-		$c->deleteObj();
+		$c->deleteObjFactory();
 		$c->setObj(function() { return new \stdClass(); });
 
 		$a = $c->getObj();
@@ -235,5 +238,14 @@ class ContainerTests extends PHPUnit_Framework_TestCase
 		$this->assertInstanceOf('\\Zit\\TestObj', $obj);
 		$this->assertAttributeEquals('object one', 'name', $obj);
 	}
-}
 
+    /**
+     * @expectedException InvalidArgumentException
+     */
+	public function testInvalidArgumentMethodDoesNotExist()
+	{
+		$c = $this->container;
+
+		$c->somethingThatDoesNotExist();
+	}
+}
