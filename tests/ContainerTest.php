@@ -239,11 +239,12 @@ class ContainerTests extends PHPUnit_Framework_TestCase
 		$this->assertAttributeEquals('object one', 'name', $obj);
 	}
 
+    /**
+     * @expectedException InvalidArgumentException
+     */
 	public function testInvalidArgumentMethodDoesNotExist()
 	{
 		$c = $this->container;
-
-		$this->expectException(InvalidArgumentException::class);
 
 		$c->somethingThatDoesNotExist();
 	}
