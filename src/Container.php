@@ -7,7 +7,7 @@
 
 namespace Zit;
 
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use Zit\Exception\NotFoundException;
 
 /**
@@ -28,9 +28,24 @@ class Container implements ContainerInterface
     protected $callbacks = array();
 
     /**
+     * @var Definition[] List of definitions
+     */
+    protected $definitions = array();
+
+    /**
      * @var array Keys marked as factories (always return fresh)
      */
     protected $factories = array();
+
+    /**
+     * @var Resolver The dependency resolver
+     */
+    protected $resolver;
+
+    public function __construct()
+    {
+        $this->resolver = new Resolver($this);
+    }
 
     /**
      * Handles magic methods
@@ -47,6 +62,10 @@ class Container implements ContainerInterface
 
         // Determine method
         $method = array_shift($parts);
+        if ('register' === $method) {
+            throw new Exception\Container("register is not supported as a magic method");
+        }
+
         if ('new' == $method) {
             $method = 'fresh';
         }
@@ -83,13 +102,6 @@ class Container implements ContainerInterface
      */
     public function set($name, $callableOrStatic)
     {
-        if (!is_callable($callableOrStatic)) {
-            $value            = $callableOrStatic;
-            $callableOrStatic = function () use ($value) {
-                return $value;
-            };
-        }
-
         $this->callbacks[$name] = $callableOrStatic;
 
         return $this;
@@ -117,7 +129,7 @@ class Container implements ContainerInterface
      */
     public function has($name)
     {
-        return isset($this->callbacks[$name]);
+        return isset($this->definitions[$name]) || isset($this->callbacks[$name]);
     }
 
     /**
@@ -159,8 +171,16 @@ class Container implements ContainerInterface
      */
     public function fresh($name)
     {
+        if (isset($this->definitions[$name])) {
+            return $this->objects[$name]['_no_arguments'] = $this->resolver->resolve($this->definitions[$name]);
+        }
+
         if (!isset($this->callbacks[$name])) {
             throw new NotFoundException(sprintf('Callback for "%s" does not exist.', $name));
+        }
+
+        if (!is_callable($this->callbacks[$name])) {
+            return $this->objects[$name]['_no_arguments'] = $this->callbacks[$name];
         }
 
         $arguments    = func_get_args();
@@ -204,7 +224,25 @@ class Container implements ContainerInterface
             $deleted = true;
         }
 
+        // Delete definitions
+        if (isset($this->definitions[$name])) {
+            unset($this->definitions[$name]);
+            $deleted = true;
+        }
+
         return $deleted;
+    }
+
+    /**
+     * Registers a new definition with the class
+     *
+     * @param string      $id
+     * @param string|null $class
+     * @return Definition
+     */
+    public function register(string $id, string $class = null): Definition
+    {
+        return $this->definitions[$id] = new Definition($id, $class ?? $id);
     }
 
     /**

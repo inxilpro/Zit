@@ -245,4 +245,19 @@ class ContainerTests extends TestCase
         $this->expectException(\InvalidArgumentException::class);
 		$c->somethingThatDoesNotExist();
 	}
+
+	public function testRegister()
+    {
+        $this->container->register(TestObj::class)->params['name'] = 'registration';
+
+        self::assertTrue($this->container->has(TestObj::class));
+        self::assertInstanceOf(TestObj::class, $obj = $this->container->get(TestObj::class));
+        self::assertEquals('registration', $obj->name);
+    }
+
+    public function testMagicRegisterThrowsException()
+    {
+        $this->expectException(Exception\Container::class);
+        $this->container->registerTestObj();
+    }
 }

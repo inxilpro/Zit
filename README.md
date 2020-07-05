@@ -41,7 +41,46 @@ Zit also provides convenient magic methods for setting instantiation functions:
 $container->setAuth(function() { /* ... */ }); // Or:
 $container->set_auth(function() { /* ... */ });
 ```
-	
+
+## Auto-wiring
+
+Zit has an an auto-wiring resolver, via `register($id, $class)` you will receive a `Definition` object that contains
+the constructor parameters and any method calls.
+
+```php
+$container->register(MyClass::class);
+$container->get(MyClass::class); // Instance of MyClass
+```
+
+### Modifying parameters
+
+Constructor parameters can be set manually by calling `setParameter($key, $value)`
+
+```php
+// new MyClass('something');
+$container->register(MyClass::class)->setParameter('arg1', 'something');
+```
+
+### Method calls
+
+You may also set method calls on the definition
+
+```php
+// (new MyClass)->setSomething('something');
+$container->register(MyClass::class)->addMethodCall('setSomething', ['arg1' => 'something']);
+```
+
+### Referencing other container definitions
+
+You can set references to values in the container by using `Resolver::reference($id)`.
+
+```php
+$container->register(MyClass::class);
+$container->register(AnotherClass::class)->setParameter('test', Resolver::Reference(MyClass::class));
+```
+
+This is not limited to just auto-wired definitions, any key in the container can be referenced.
+
 ## Getting Objects
 
 Getting objects are as simple as:
@@ -78,7 +117,7 @@ Sometimes you need to pass parameters to the constructor of an object, while sti
 dependencies.  Zit automatically passes all parameters on to your instantiation function:
 
 ```php
-$container->setUser(function($c, $id)) {
+$container->setUser(function($c, $id) {
 	$user = new User($id);
 	$user->setDb($c->getDb());
 	return $user;
@@ -119,28 +158,3 @@ class Container extends \Zit\Container
 	}
 }
 ```
-
-## Change Log
-
-### Version 3.0.0
-
-  - Implemented [Container Interoperability](https://github.com/container-interop/container-interop). Zit was already
-    `container-interop` compatible, but it now implements the interface and throws an exception that implements
-    `Interop\Container\Exception\NotFoundException` when a item is not found. This exception extends
-    `\InvalidArgumentException`, so 3.0.0 should be nearly 100% backwards-compatible, but I'm bumping the major version
-    just in case.
-  - Dropped support for PHP 5.3
-  - Removed deprecated function `setParam`
-  - `setFactory()` now accepts any `callable` instead of specifically a `Closure`
-  - Fixed a typo in the exception message thrown from `__call` if a method does not exist
-  - `set()` is now fluent (returns the container for chaining)
-  - Switched to md4 hashing for speed improvements (we don't need the security of md5)
-  - Added DocBlocks throughout the code
-
-### Version 2.0
-
-  - Removed the `setParam` method in favor of checking whether the parameter passed to `set` is callable.
-  - Added the "Factory" variant.  This could cause backwards compatibility issues if you have set up objects that end with the word "factory".
-  - Updated the `delete` method so that it clears out objects, callbacks, and factories, which could have some abnormal BC issues as well.
-
-
