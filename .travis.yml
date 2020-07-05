@@ -4,7 +4,6 @@ php:
   - 7.2
   - 7.3
   - 7.4
-  - nightly-8.0
 
 install:
   - composer self-update
@@ -13,6 +12,4 @@ install:
 script: composer test
 
 matrix:
-  allow_failures:
-    - php: nightly-8.0
   fast_finish: true
