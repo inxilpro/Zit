@@ -1,14 +1,13 @@
 <?php
 
-require_once __DIR__ . '/../vendor/autoload.php';
-require_once 'TestObj.php';
+namespace Zit;
 
-use \Zit\Container;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Container test case.
  */
-class ContainerTests extends PHPUnit_Framework_TestCase
+class ContainerTests extends TestCase
 {
 	/**
 	 * @var Container
@@ -18,7 +17,7 @@ class ContainerTests extends PHPUnit_Framework_TestCase
 	/**
 	 * Prepares the environment before running a test.
 	 */
-	protected function setUp()
+	protected function setUp(): void
 	{
 		$this->container = new Container();
 	}
@@ -26,121 +25,121 @@ class ContainerTests extends PHPUnit_Framework_TestCase
 	/**
 	 * Cleans up the environment after running a test.
 	 */
-	protected function tearDown()
+	protected function tearDown(): void
 	{
 		$this->container = null;
 	}
-	
+
 	public function testSetAndHas()
 	{
 		$c = $this->container;
-		
+
 		// Explicit Call
 		$c->set('test', function() {});
-		$this->assertTrue($c->has('test'));
-		
+		self::assertTrue($c->has('test'));
+
 		// Magic Call
 		$c->setTest2(function() {});
-		$this->assertTrue($c->hasTest2());
+		self::assertTrue($c->hasTest2());
 	}
-	
+
 	public function testSetParam()
 	{
 		$c = $this->container;
-		
+
 		$c->set('test', 'testing');
-		$this->assertEquals('testing', $c->get('test'));
+		self::assertEquals('testing', $c->get('test'));
 
 		$o = new \stdClass();
 		$c->set('test2', $o);
-		$this->assertSame($o, $c->get('test2'));
+		self::assertSame($o, $c->get('test2'));
 
 		$c->setString('test3');
-		$this->assertEquals('test3', $c->get('string'));
+		self::assertEquals('test3', $c->get('string'));
 	}
-	
+
 	public function testGet()
 	{
 		$c = $this->container;
-		
+
 		// Explicit Call
 		$c->set('test', function($c, $name) {
-			return new \Zit\TestObj($name);
+			return new TestObj($name);
 		});
 		$obj = $c->get('test', 'testing');
-		$this->assertInstanceOf('\\Zit\\TestObj', $obj);
-		$this->assertAttributeEquals('testing', 'name', $obj);
-		
+		self::assertInstanceOf(TestObj::class, $obj);
+		self::assertEquals('testing', $obj->name);
+
 		// Magic Call
 		$c->setAnotherTest(function($c, $name) {
-			return new \Zit\TestObj($name);
+			return new TestObj($name);
 		});
 		$obj2 = $c->getAnotherTest('still testing');
-		$this->assertInstanceOf('\\Zit\\TestObj', $obj2);
-		$this->assertAttributeEquals('still testing', 'name', $obj2);
-		
+		self::assertInstanceOf(TestObj::class, $obj2);
+		self::assertEquals('still testing', $obj2->name);
+
 		// Sanity Check
-		$this->assertNotSame($obj, $obj2);
+		self::assertNotSame($obj, $obj2);
 	}
-	
+
 	public function testFresh()
 	{
 		$c = $this->container;
-		
+
 		$c->setObj(function($c, $name) {
-			return new \Zit\TestObj($name);
+			return new TestObj($name);
 		});
-		
+
 		$o1 = $c->fresh('obj', 'one');
 		$o2 = $c->freshObj('Two');
 		$o3 = $c->fresh_obj('Three');
 		$o4 = $c->newObj('Four');
 		$o5 = $c->new_obj('Five');
-		
-		$this->assertNotSame($o1, $o2);
-		$this->assertNotSame($o1, $o3);
-		$this->assertNotSame($o1, $o4);
-		$this->assertNotSame($o1, $o5);
-		
-		$this->assertNotSame($o2, $o3);
-		$this->assertNotSame($o2, $o4);
-		$this->assertNotSame($o2, $o5);
-		
-		$this->assertNotSame($o3, $o4);
-		$this->assertNotSame($o3, $o5);
-		
-		$this->assertNotSame($o4, $o5);
+
+		self::assertNotSame($o1, $o2);
+		self::assertNotSame($o1, $o3);
+		self::assertNotSame($o1, $o4);
+		self::assertNotSame($o1, $o5);
+
+		self::assertNotSame($o2, $o3);
+		self::assertNotSame($o2, $o4);
+		self::assertNotSame($o2, $o5);
+
+		self::assertNotSame($o3, $o4);
+		self::assertNotSame($o3, $o5);
+
+		self::assertNotSame($o4, $o5);
 	}
 
 	public function testFactory()
 	{
 		$c = $this->container;
-		
+
 		$c->setObjFactory(function($c, $name) {
-			return new \Zit\TestObj($name);
+			return new TestObj($name);
 		});
-		
+
 		$o1 = $c->newObj('pizza');
 		$o2 = $c->newObj('pizza');
-		
-		$this->assertNotSame($o1, $o2);
-		
+
+		self::assertNotSame($o1, $o2);
+
 		$c->setFactory('obj2', function($c, $name) {
-			return new \Zit\TestObj($name);
+			return new TestObj($name);
 		});
 
 		$o3 = $c->newObj2('pizza');
 		$o4 = $c->newObj2('pizza');
-		
-		$this->assertNotSame($o3, $o4);
+
+		self::assertNotSame($o3, $o4);
 	}
-	
+
 	public function testDelete()
 	{
 		$c = $this->container;
 		$c->setObj(function() { return new \stdClass(); });
 
-		$this->assertInstanceOf('\\stdClass',$c->getObj());
+		self::assertInstanceOf('\\stdClass',$c->getObj());
 
 		$c->deleteObj();
 
@@ -161,7 +160,7 @@ class ContainerTests extends PHPUnit_Framework_TestCase
 		$a = $c->getObj();
 		$b = $c->getObj();
 
-		$this->assertNotSame($a, $b);
+		self::assertNotSame($a, $b);
 
 		$c->deleteObjFactory();
 		$c->setObj(function() { return new \stdClass(); });
@@ -169,83 +168,81 @@ class ContainerTests extends PHPUnit_Framework_TestCase
 		$a = $c->getObj();
 		$b = $c->getObj();
 
-		$this->assertSame($a, $b);
+		self::assertSame($a, $b);
 	}
-	
+
 	public function testDependency()
 	{
 		$c = $this->container;
-		
+
 		$c->setParent(function() {
 			return new \stdClass();
 		});
-		
+
 		$c->setChild(function($c) {
 			$child = new \stdClass();
 			$child->parent = $c->getParent();
 			return $child;
 		});
-		
+
 		$parent = $c->getParent();
 		$child = $c->getChild();
-		
-		$this->assertSame($parent, $child->parent);
+
+		self::assertSame($parent, $child->parent);
 	}
-	
+
 	public function testConstructorArguments()
 	{
 		$c = $this->container;
-		
+
 		$c->setTestObj(function($c, $name) {
-			return new \Zit\TestObj($name);
+			return new TestObj($name);
 		});
-		
+
 		$o1 = $c->getTestObj('A');
 		$o2 = $c->getTestObj();
 		$o3 = $c->newTestObj('B');
 		$o4 = $c->getTestObj('A');
-		
-		$this->assertAttributeEquals('A', 'name', $o1);
-		$this->assertAttributeEquals('A', 'name', $o2);
-		$this->assertAttributeEquals('B', 'name', $o3);
-		$this->assertSame($o1, $o4);
+
+		self::assertEquals('A', $o1->name);
+		self::assertEquals('A', $o2->name);
+		self::assertEquals('B', $o3->name);
+		self::assertSame($o1, $o4);
 	}
-	
+
 	public function testAlternateMethodFormat()
 	{
 		$c = $this->container;
-		
+
 		$c->set_with_underscores(function($c, $name) {
-			return new \Zit\TestObj($name);
+			return new TestObj($name);
 		});
-		
+
 		$obj = $c->get_with_underscores('Alternate');
-		
-		$this->assertInstanceOf('\\Zit\\TestObj', $obj);
-		$this->assertAttributeEquals('Alternate', 'name', $obj);
+
+		self::assertInstanceOf(TestObj::class, $obj);
+		self::assertEquals('Alternate', $obj->name);
 	}
-	
+
 	public function testMixedMethodFormat()
 	{
 		$c = $this->container;
-		
+
 		$c->setObjectOne(function() {
-			return new \Zit\TestObj('object one');
+			return new TestObj('object one');
 		});
-		
+
 		$obj = $c->get_object_one();
-		
-		$this->assertInstanceOf('\\Zit\\TestObj', $obj);
-		$this->assertAttributeEquals('object one', 'name', $obj);
+
+		self::assertInstanceOf(TestObj::class, $obj);
+		self::assertEquals('object one', $obj->name);
 	}
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
 	public function testInvalidArgumentMethodDoesNotExist()
 	{
 		$c = $this->container;
 
+        $this->expectException(\InvalidArgumentException::class);
 		$c->somethingThatDoesNotExist();
 	}
 }
