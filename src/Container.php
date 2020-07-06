@@ -17,6 +17,8 @@ use Zit\Exception\NotFoundException;
  */
 class Container implements ContainerInterface
 {
+    protected const NO_ARGS = '_no_arguments';
+
     /**
      * @var array Instantiated objects
      */
@@ -45,6 +47,10 @@ class Container implements ContainerInterface
     public function __construct()
     {
         $this->resolver = new Resolver($this);
+
+        // auto-register ourself
+        $this->objects['container'][self::NO_ARGS]               = $this;
+        $this->objects[ContainerInterface::class][self::NO_ARGS] = $this;
     }
 
     /**
@@ -150,7 +156,7 @@ class Container implements ContainerInterface
             array_shift($args);
 
             $key = $this->keyForArguments($args);
-            if ('_no_arguments' == $key && !isset($this->objects[$name][$key]) && !empty($this->objects[$name])) {
+            if (self::NO_ARGS == $key && !isset($this->objects[$name][$key]) && !empty($this->objects[$name])) {
                 $key = key($this->objects[$name]);
             }
 
@@ -172,7 +178,7 @@ class Container implements ContainerInterface
     public function fresh($name)
     {
         if (isset($this->definitions[$name])) {
-            return $this->objects[$name]['_no_arguments'] = $this->resolver->resolve($this->definitions[$name]);
+            return $this->objects[$name][self::NO_ARGS] = $this->resolver->resolve($this->definitions[$name]);
         }
 
         if (!isset($this->callbacks[$name])) {
@@ -180,7 +186,7 @@ class Container implements ContainerInterface
         }
 
         if (!is_callable($this->callbacks[$name])) {
-            return $this->objects[$name]['_no_arguments'] = $this->callbacks[$name];
+            return $this->objects[$name][self::NO_ARGS] = $this->callbacks[$name];
         }
 
         $arguments    = func_get_args();
@@ -258,7 +264,7 @@ class Container implements ContainerInterface
         }
 
         if (0 == count($arguments)) {
-            return '_no_arguments';
+            return self::NO_ARGS;
         }
 
         // md4 is slightly faster than md5

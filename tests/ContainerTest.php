@@ -3,6 +3,7 @@
 namespace Zit;
 
 use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerInterface;
 
 /**
  * Container test case.
@@ -259,5 +260,12 @@ class ContainerTests extends TestCase
     {
         $this->expectException(Exception\Container::class);
         $this->container->registerTestObj();
+    }
+
+    public function testAutoRegistersItself()
+    {
+        $c1 = $this->container->get('container');
+        $c2 = $this->container->get(ContainerInterface::class);
+        self::assertSame($c1, $c2);
     }
 }
