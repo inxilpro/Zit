@@ -89,11 +89,11 @@ class ResolverTest extends TestCase
         self::assertInstanceOf(TestObjNoConstructor::class, $obj->instance);
     }
 
-    public function testResolveWithTypedParametersThrowsExceptionOnInvalidClass()
+    public function testResolveWithTypedParametersThrowsExceptionOnInvalidReference()
     {
         $def = (new Definition('test', TestObjNoConstructor::class))
             ->setMethodCall('setBadClass');
-        $this->expectException(MissingArgument::class);
+        $this->expectException(NotFoundException::class);
         $this->resolver->resolve($def);
     }
 

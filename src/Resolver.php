@@ -7,7 +7,6 @@
 
 namespace Zit;
 
-use Zit\Exception\ClassNotFound;
 use Zit\Exception\MissingArgument;
 use Zit\Exception\NotFoundException;
 
@@ -142,8 +141,13 @@ class Resolver
                 }
             }
 
-            if ($param->isOptional() && $param->isDefaultValueAvailable()) {
-                $outParams[$param->getPosition()] = $param->getDefaultValue();
+            if ($param->isOptional()) {
+                if ($param->isDefaultValueAvailable()) {
+                    $outParams[$param->getPosition()] = $param->getDefaultValue();
+                }
+                elseif ($param->allowsNull()) {
+                    $outParams[$param->getPosition()] = null;
+                }
                 continue;
             }
 
@@ -163,7 +167,7 @@ class Resolver
      */
     protected function resolveValueByParameterType(string $name, \ReflectionType $type, array $arguments)
     {
-        if ($type instanceof \ReflectionNamedType) {
+        if ($type instanceof \ReflectionNamedType && !$type->isBuiltin()) {
             $name = $type->getName();
             if (!$this->container->has($name) && class_exists($name)) {
                 if ($type->allowsNull()) {
@@ -172,9 +176,9 @@ class Resolver
                 }
 
                 $this->container->register($name);
-
-                return "@@{$name}@@";
             }
+
+            return "@@{$name}@@";
         }
 
         if ($type->allowsNull()) {
