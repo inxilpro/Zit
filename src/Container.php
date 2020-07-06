@@ -48,9 +48,11 @@ class Container implements ContainerInterface
     {
         $this->resolver = new Resolver($this);
 
-        // auto-register ourself
+        // register ourself as a default
         $this->objects['container'][self::NO_ARGS]               = $this;
         $this->objects[ContainerInterface::class][self::NO_ARGS] = $this;
+        $this->callbacks[ContainerInterface::class]              = true;
+        $this->callbacks['container']                            = true;
     }
 
     /**
