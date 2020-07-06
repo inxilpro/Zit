@@ -128,4 +128,29 @@ class ResolverTest extends TestCase
         self::assertInstanceOf(TestObjNoConstructor::class, $obj = $this->resolver->resolve($def));
         self::assertNull($obj->name);
     }
+
+    public function testResolveWithFactory()
+    {
+        $def = (new Definition('test', TestObjNoConstructor::class))
+            ->setFactoryMethod('staticFactoy');
+        self::assertEquals('static data', $obj = $this->resolver->resolve($def));
+    }
+
+    public function testResolveWithFactoryReference()
+    {
+        $this->container->register(TestObjNoConstructor::class);
+        $def = (new Definition('test', Resolver::reference(TestObjNoConstructor::class)))
+            ->setFactoryMethod('staticFactoy');
+        self::assertEquals('static data', $obj = $this->resolver->resolve($def));
+    }
+
+    /**
+     * NOTE: this is basically providing alias functionality
+     */
+    public function testResolveWithReference()
+    {
+        $this->container->register(TestObjNoConstructor::class);
+        $this->container->register('test', Resolver::reference(TestObjNoConstructor::class));
+        self::assertInstanceOf(TestObjNoConstructor::class, $this->container->get('test'));
+    }
 }

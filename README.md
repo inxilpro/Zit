@@ -70,6 +70,29 @@ You may also set method calls on the definition
 $container->register(MyClass::class)->addMethodCall('setSomething', ['arg1' => 'something']);
 ```
 
+### Factories
+
+While the main container supports factories, you may also use definitions to set factories.
+
+This is different from using the method calls, as this will return the results of the factory method as if it were
+a regular instantiation.
+
+```php
+// MyFactory::build();
+$container->register(MyFactory::class)
+          ->setFactoryMethod('build');
+
+// MyFactory::build('now');
+$container->register(MyFactory::class)
+          ->setFactoryMethod('build')
+          ->setParameter('arg1', 'now');
+
+// ($container->get(MyFactory::class))->build();
+$container->register(Resolver::reference(MyFactory::class))
+          ->setFactoryMethod('build')
+          ->setParameter('arg1', 'now');
+```
+
 ### Referencing other container definitions
 
 You can set references to values in the container by using `Resolver::reference($id)`.
@@ -128,7 +151,7 @@ $user = $container->newUser(1);
 // Parameters are taken into account when caching results:
 $user2 = $container->getUser(1); // $user2 === $user;
 ```
-	
+
 ## Storing Static Content
 
 You can also use Zit to store strings/objects/etc. Just pass it instead of a generator:

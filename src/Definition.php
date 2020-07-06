@@ -25,6 +25,11 @@ class Definition
     public $class;
 
     /**
+     * @var string The factory method to call
+     */
+    public $factoryMethod;
+
+    /**
      * @var array List of constructor parameters
      */
     public $params = [];
@@ -40,6 +45,28 @@ class Definition
         $this->class = $class;
     }
 
+    /**
+     * Marks the definition as being a factory
+     *
+     * @param string $method
+     * @return $this
+     */
+    public function setFactoryMethod(string $method): Definition
+    {
+        $this->factoryMethod = $method;
+
+        return $this;
+    }
+
+    /**
+     * Sets the method call to the given params.
+     *
+     * NOTE: this replaces all contents
+     *
+     * @param string $method
+     * @param array  $params
+     * @return $this
+     */
     public function setMethodCall(string $method, array $params = []): Definition
     {
         $this->methodCalls[$method] = [$params];

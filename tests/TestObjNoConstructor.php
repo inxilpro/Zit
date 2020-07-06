@@ -41,4 +41,9 @@ class TestObjNoConstructor
     {
         $this->name = $string;
     }
+
+    public static function staticFactoy()
+    {
+        return "static data";
+    }
 }

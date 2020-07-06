@@ -36,8 +36,17 @@ class Resolver
      */
     public function resolve(Definition $definition)
     {
+        if (isset($definition->factoryMethod)) {
+            return $this->resolveFactory($definition);
+        }
+
+        $reference = $this->resolveReference($definition->class);
+        if ($reference) {
+            return $this->container->get($reference);
+        }
+
         $instance = $this->resolveInstance($definition);
-        $class    = new \ReflectionClass($definition->class);
+        $class    = new \ReflectionClass($instance);
         foreach ($definition->methodCalls as $methodName => $calls) {
             $method = $class->getMethod($methodName);
             foreach ($calls as $arguments) {
@@ -58,6 +67,30 @@ class Resolver
     public static function reference(string $id): string
     {
         return "@@{$id}@@";
+    }
+
+    /**
+     * Resolves the definition as a factory
+     *
+     * @param Definition $definition
+     * @return mixed
+     * @throws \ReflectionException
+     */
+    protected function resolveFactory(Definition $definition)
+    {
+        $reference = $this->resolveReference($definition->class);
+        $instance  = $definition->class;
+        if ($reference) {
+            $instance = $this->container->get($reference);
+        }
+
+        $class  = new \ReflectionClass($reference ? $instance : $definition->class);
+        $method = $class->getMethod($definition->factoryMethod);
+
+        return call_user_func_array(
+            [$instance, $definition->factoryMethod],
+            $this->resolveMethodParams($method->getParameters(), $definition->params)
+        );
     }
 
     /**
@@ -133,7 +166,7 @@ class Resolver
                 continue;
             }
 
-            if ($param->hasType()) {
+            if ($param->hasType() && !$param->getType()->isBuiltin()) {
                 $value = $this->resolveValueByParameterType($name, $param->getType(), $arguments);
                 if ($value !== self::INVALID) {
                     $outParams[$param->getPosition()] = $this->resolveValue($value);
@@ -144,11 +177,11 @@ class Resolver
             if ($param->isOptional()) {
                 if ($param->isDefaultValueAvailable()) {
                     $outParams[$param->getPosition()] = $param->getDefaultValue();
-                }
-                elseif ($param->allowsNull()) {
+                    continue;
+                } elseif ($param->allowsNull()) {
                     $outParams[$param->getPosition()] = null;
+                    continue;
                 }
-                continue;
             }
 
             throw new MissingArgument("Argument not found: {$name}");
@@ -167,7 +200,7 @@ class Resolver
      */
     protected function resolveValueByParameterType(string $name, \ReflectionType $type, array $arguments)
     {
-        if ($type instanceof \ReflectionNamedType && !$type->isBuiltin()) {
+        if ($type instanceof \ReflectionNamedType) {
             $name = $type->getName();
             if (!$this->container->has($name) && class_exists($name)) {
                 if ($type->allowsNull()) {
