@@ -24,9 +24,6 @@ class Definition
      */
     public $class;
 
-    /**
-     * @var string The factory method to call
-     */
     public $factoryMethod;
 
     /**
@@ -45,28 +42,13 @@ class Definition
         $this->class = $class;
     }
 
-    /**
-     * Marks the definition as being a factory
-     *
-     * @param string $method
-     * @return $this
-     */
-    public function setFactoryMethod(string $method): Definition
+    public function setFactoryMethod($method)
     {
         $this->factoryMethod = $method;
 
         return $this;
     }
 
-    /**
-     * Sets the method call to the given params.
-     *
-     * NOTE: this replaces all contents
-     *
-     * @param string $method
-     * @param array  $params
-     * @return $this
-     */
     public function setMethodCall(string $method, array $params = []): Definition
     {
         $this->methodCalls[$method] = [$params];
@@ -154,5 +136,23 @@ class Definition
         unset($this->params[$param]);
 
         return $this;
+    }
+
+    /**
+     * Deserialization
+     *
+     * @param array $array
+     * @return Definition
+     */
+    public static function __set_state(array $array)
+    {
+        $definition = new Definition($array['id'], $array['class']);
+        foreach (['factoryMethod', 'params', 'methodCalls'] as $key) {
+            if (array_key_exists($key, $array)) {
+                $definition->$key = $array[$key];
+            }
+        }
+
+        return $definition;
     }
 }

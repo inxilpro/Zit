@@ -62,6 +62,7 @@ class Resolver
      * Returns a reference string
      *
      * @param string $id The id to reference
+     *
      * @return string The encapsulated reference string
      */
     public static function reference(string $id): string
@@ -116,6 +117,7 @@ class Resolver
      * Returns the references actual value
      *
      * @param mixed $value The value to resolve a reference for
+     *
      * @return string|null The reference or null if not a reference
      */
     protected function resolveReference($value)
@@ -132,6 +134,7 @@ class Resolver
      *
      * @param Definition $definition
      * @param array      $params
+     *
      * @return array
      * @throws \ReflectionException
      */
@@ -166,7 +169,7 @@ class Resolver
                 continue;
             }
 
-            if ($param->hasType() && !$param->getType()->isBuiltin()) {
+            if ($param->hasType()) {
                 $value = $this->resolveValueByParameterType($name, $param->getType(), $arguments);
                 if ($value !== self::INVALID) {
                     $outParams[$param->getPosition()] = $this->resolveValue($value);
@@ -177,11 +180,16 @@ class Resolver
             if ($param->isOptional()) {
                 if ($param->isDefaultValueAvailable()) {
                     $outParams[$param->getPosition()] = $param->getDefaultValue();
-                    continue;
                 } elseif ($param->allowsNull()) {
                     $outParams[$param->getPosition()] = null;
-                    continue;
                 }
+                continue;
+            }
+
+            // special case
+            if ($name === 'container') {
+                $outParams[$param->getPosition()] = $this->container;
+                continue;
             }
 
             throw new MissingArgument("Argument not found: {$name}");
@@ -196,11 +204,12 @@ class Resolver
      * @param string          $name
      * @param \ReflectionType $type
      * @param array           $arguments
+     *
      * @return mixed|string|null
      */
     protected function resolveValueByParameterType(string $name, \ReflectionType $type, array $arguments)
     {
-        if ($type instanceof \ReflectionNamedType) {
+        if ($type instanceof \ReflectionNamedType && !$type->isBuiltin()) {
             $name = $type->getName();
             if (!$this->container->has($name) && class_exists($name)) {
                 if ($type->allowsNull()) {
