@@ -2,6 +2,7 @@
 
 namespace Zit;
 
+use _HumbugBox69342eed62ce\Roave\BetterReflection\Reflection\Adapter\ReflectionClass;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 
@@ -267,5 +268,15 @@ class ContainerTests extends TestCase
         $c1 = $this->container->get('container');
         $c2 = $this->container->get(ContainerInterface::class);
         self::assertSame($c1, $c2);
+    }
+
+    public function testAllowsCustomResolver()
+    {
+        $c = new Container(TestResolver::class);
+        $c->register(TestObj::class);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('not resolving');
+        $c->get(TestObj::class);
     }
 }

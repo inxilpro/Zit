@@ -44,11 +44,12 @@ class Container implements ContainerInterface
      */
     protected $resolver;
 
-    public function __construct()
+    public function __construct($resolverClass = null)
     {
-        $this->resolver = new Resolver($this);
+        $resolverClass  = $resolverClass ?? Resolver::class;
+        $this->resolver = new $resolverClass($this);
 
-        // register ourself as a default
+        // auto-register ourself
         $this->objects['container'][self::NO_ARGS]               = $this;
         $this->objects[ContainerInterface::class][self::NO_ARGS] = $this;
         $this->callbacks[ContainerInterface::class]              = true;
