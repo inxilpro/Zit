@@ -219,6 +219,9 @@ class Resolver
 
                 $this->container->register($name);
             }
+            elseif ($type->allowsNull()) {
+                return null;
+            }
 
             return "@@{$name}@@";
         }
