@@ -42,14 +42,12 @@
   },
   "require-dev": {
     "phpstan/phpstan": "^0.12.32",
-    "phpunit/phpunit": "^8.5",
-    "squizlabs/php_codesniffer": "^3.5",
-    "sebastian/phpcpd": "^4.1"
+    "phpunit/phpunit": "^8.5 || ^9.3",
+    "squizlabs/php_codesniffer": "^3.5"
   },
   "scripts": {
     "test": "phpunit --colors=always",
     "sniff": "phpcs --standard=PSR12 src",
-    "phpcpd": "phpcpd src tests",
     "phpstan": "phpstan analyse src --memory-limit=1"
   }
 }
