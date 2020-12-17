@@ -23,6 +23,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Set up PHP ${{ matrix.php }}
+        if: matrix.analysis
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
@@ -42,10 +43,8 @@ jobs:
       - name: Tests
         run: vendor/bin/phpunit --coverage-clover clover.xml
 
-      - name: Upload coverage results to Coveralls
-        if: matrix.analysis
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
-        run: |
-          composer require php-coveralls/php-coveralls -n
-          vendor/bin/php-coveralls --coverage_clover=clover.xml -v
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+            github-token: ${{ secrets.GITHUB_TOKEN }}
+            path-to-lcov: clover.xml
