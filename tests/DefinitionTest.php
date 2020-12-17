@@ -27,7 +27,7 @@ class DefinitionTest extends TestCase
     public function testSetAndClearMethodCall()
     {
 
-        $expected = $this->definition->methodCalls;
+        $expected           = $this->definition->methodCalls;
         $expected['test'][] = ['three' => 3];
 
         self::assertSame($this->definition, $this->definition->setMethodCall('test', ['three' => 3]));
@@ -37,9 +37,10 @@ class DefinitionTest extends TestCase
         self::assertSame($this->definition, $this->definition->clearMethodCalls('test'));
         self::assertEquals($expected, $this->definition->methodCalls);
     }
+
     public function testAddMethodCall()
     {
-        $expected = $this->definition->methodCalls;
+        $expected          = $this->definition->methodCalls;
         $expected['one'][] = ['three' => 3];
 
         self::assertSame($this->definition, $this->definition->addMethodCall('one', ['three' => 3]));
@@ -48,7 +49,7 @@ class DefinitionTest extends TestCase
 
     public function testAddMethodCallFirstTime()
     {
-        $expected = $this->definition->methodCalls;
+        $expected           = $this->definition->methodCalls;
         $expected['test'][] = ['three' => 3];
 
         self::assertSame($this->definition, $this->definition->addMethodCall('test', ['three' => 3]));
@@ -75,5 +76,18 @@ class DefinitionTest extends TestCase
         $this->definition->params['test'] = 'test';
         self::assertSame($this->definition, $this->definition->clearParameters());
         self::assertEmpty($this->definition->params);
+    }
+
+    public function testMagicSetState()
+    {
+        $actual = Definition::__set_state([
+            'id'            => 'test',
+            'class'         => 'test',
+            'factoryMethod' => null,
+            'params'        => [],
+            'methodCalls'   => $this->definition->methodCalls
+        ]);
+
+        self::assertEquals($this->definition->methodCalls, $actual->methodCalls);
     }
 }

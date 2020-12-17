@@ -1,6 +1,9 @@
 <?php
 
-namespace Zit;
+namespace Zit\Fixture;
+
+use Zit\Definition;
+use Zit\Resolver;
 
 class TestResolver
     extends Resolver

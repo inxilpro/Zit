@@ -7,6 +7,11 @@
 
 namespace Zit;
 
+use ReflectionClass;
+use ReflectionException;
+use ReflectionNamedType;
+use ReflectionParameter;
+use ReflectionType;
 use Zit\Exception\MissingArgument;
 use Zit\Exception\NotFoundException;
 
@@ -30,9 +35,10 @@ class Resolver
     }
 
     /**
-     * @param $definition
+     * @param Definition $definition
      *
      * @return mixed
+     * @throws ReflectionException
      */
     public function resolve(Definition $definition)
     {
@@ -46,7 +52,7 @@ class Resolver
         }
 
         $instance = $this->resolveInstance($definition);
-        $class    = new \ReflectionClass($instance);
+        $class    = new ReflectionClass($instance);
         foreach ($definition->methodCalls as $methodName => $calls) {
             $method = $class->getMethod($methodName);
             foreach ($calls as $arguments) {
@@ -75,7 +81,7 @@ class Resolver
      *
      * @param Definition $definition
      * @return mixed
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     protected function resolveFactory(Definition $definition)
     {
@@ -85,10 +91,11 @@ class Resolver
             $instance = $this->container->get($reference);
         }
 
-        $class  = new \ReflectionClass($reference ? $instance : $definition->class);
+        $class  = new ReflectionClass($reference ? $instance : $definition->class);
         $method = $class->getMethod($definition->factoryMethod);
 
         return call_user_func_array(
+            /* @phpstan-ignore-next-line */
             [$instance, $definition->factoryMethod],
             $this->resolveMethodParams($method->getParameters(), $definition->params)
         );
@@ -97,12 +104,15 @@ class Resolver
     /**
      * Resolves the definition to a concrete instance
      *
-     * @param string $name
-     * @param array  $args
+     * @param Definition $definition
+     *
+     * @return object
+     * @throws ReflectionException
      */
     protected function resolveInstance(Definition $definition)
     {
-        $class = new \ReflectionClass($definition->class);
+        /* @phpstan-ignore-next-line */
+        $class = new ReflectionClass($definition->class);
         if ($constructor = $class->getConstructor()) {
             $params   = $this->resolveMethodParams($constructor->getParameters(), $definition->params);
             $instance = $class->newInstanceArgs($params);
@@ -132,13 +142,10 @@ class Resolver
     /**
      * Resolves the constructor parameters, registering any that might be needed
      *
-     * @param Definition $definition
-     * @param array      $params
+     * @param mixed $value
      *
-     * @return array
-     * @throws \ReflectionException
+     * @return mixed
      */
-
     protected function resolveValue($value)
     {
         $reference = $this->resolveReference($value);
@@ -157,10 +164,19 @@ class Resolver
         throw new NotFoundException($value);
     }
 
+    /**
+     * Resolves the method parameters
+     *
+     * @param array $params
+     * @param array $arguments
+     *
+     * @return array
+     * @throws ReflectionException
+     */
     protected function resolveMethodParams(array $params, array $arguments): array
     {
         $outParams = [];
-        /** @var \ReflectionParameter $param */
+        /** @var ReflectionParameter $param */
         foreach ($params as $param) {
             $name = $param->getName();
             if (isset($arguments[$name])) {
@@ -177,12 +193,8 @@ class Resolver
                 }
             }
 
-            if ($param->isOptional()) {
-                if ($param->isDefaultValueAvailable()) {
-                    $outParams[$param->getPosition()] = $param->getDefaultValue();
-                } elseif ($param->allowsNull()) {
-                    $outParams[$param->getPosition()] = null;
-                }
+            if ($param->isOptional() && $param->isDefaultValueAvailable()) {
+                $outParams[$param->getPosition()] = $param->getDefaultValue();
                 continue;
             }
 
@@ -201,15 +213,15 @@ class Resolver
     /**
      * Resolves the value based on the parameter type
      *
-     * @param string          $name
-     * @param \ReflectionType $type
-     * @param array           $arguments
+     * @param string              $name
+     * @param ReflectionType|null $type
+     * @param array               $arguments
      *
      * @return mixed|string|null
      */
-    protected function resolveValueByParameterType(string $name, \ReflectionType $type, array $arguments)
+    protected function resolveValueByParameterType(string $name, ?ReflectionType $type, array $arguments)
     {
-        if ($type instanceof \ReflectionNamedType && !$type->isBuiltin()) {
+        if ($type instanceof ReflectionNamedType && !$type->isBuiltin()) {
             $name = $type->getName();
             if (!$this->container->has($name) && class_exists($name)) {
                 if ($type->allowsNull()) {
@@ -218,15 +230,14 @@ class Resolver
                 }
 
                 $this->container->register($name);
-            }
-            elseif ($type->allowsNull()) {
+            } elseif ($type->allowsNull()) {
                 return null;
             }
 
             return "@@{$name}@@";
         }
 
-        if ($type->allowsNull()) {
+        if ($type && $type->allowsNull()) {
             return null;
         }
 

@@ -5,6 +5,12 @@ namespace Zit;
 use PHPUnit\Framework\TestCase;
 use Zit\Exception\MissingArgument;
 use Zit\Exception\NotFoundException;
+use Zit\Fixture\TestObj;
+use Zit\Fixture\TestObjDefaultNull;
+use Zit\Fixture\TestObjDefaultNullWithInvalidClass;
+use Zit\Fixture\TestObjNoConstructor;
+use Zit\Fixture\TestObjWithMissingArgument;
+use Zit\Fixture\TestTypedObj;
 
 class ResolverTest extends TestCase
 {
@@ -152,5 +158,43 @@ class ResolverTest extends TestCase
         $this->container->register(TestObjNoConstructor::class);
         $this->container->register('test', Resolver::reference(TestObjNoConstructor::class));
         self::assertInstanceOf(TestObjNoConstructor::class, $this->container->get('test'));
+    }
+
+    public function testResolveWithDefaultNullAndInvalidClass()
+    {
+        $testClass = TestObjDefaultNullWithInvalidClass::class;
+        $this->container->register($testClass);
+
+        self::assertInstanceOf($testClass, $this->container->get($testClass));
+    }
+
+    public function testResolveMethodThrowsMissingArgument()
+    {
+        $def = $this->container->register($class = TestObjNoConstructor::class);
+        $def->addMethodCall('setMissing', []);
+
+        $this->expectException(MissingArgument::class);
+        $this->expectExceptionMessage("Argument not found: value");
+
+        $this->container->get($class);
+    }
+
+    public function testResolveMethodSetsContainer()
+    {
+        $def = $this->container->register($class = TestObjNoConstructor::class);
+        $def->addMethodCall('setMissingContainer', []);
+
+        self::assertInstanceOf(Container::class, $this->container->get($class)->container);
+    }
+
+    public function testResolveMethodHitsInvalidType()
+    {
+        $def = $this->container->register($class = TestObjNoConstructor::class);
+        $def->addMethodCall('setInvalidType', []);
+
+        $this->expectException(MissingArgument::class);
+        $this->expectExceptionMessage("Argument not found: instance");
+
+        $this->container->get($class);
     }
 }

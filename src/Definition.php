@@ -24,6 +24,9 @@ class Definition
      */
     public $class;
 
+    /**
+     * @var mixed the Factory method to use
+     */
     public $factoryMethod;
 
     /**
@@ -36,12 +39,18 @@ class Definition
      */
     public $methodCalls = [];
 
-    public function __construct($id, $class)
+    public function __construct(string $id, string $class)
     {
         $this->id    = $id;
         $this->class = $class;
     }
 
+    /**
+     * Sets the factory method
+     * @param mixed $method
+     *
+     * @return $this
+     */
     public function setFactoryMethod($method)
     {
         $this->factoryMethod = $method;
@@ -49,6 +58,14 @@ class Definition
         return $this;
     }
 
+    /**
+     * Sets the method call for this definition
+     *
+     * @param string $method
+     * @param array  $params
+     *
+     * @return $this
+     */
     public function setMethodCall(string $method, array $params = []): Definition
     {
         $this->methodCalls[$method] = [$params];

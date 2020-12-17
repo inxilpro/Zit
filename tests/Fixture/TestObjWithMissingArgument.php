@@ -1,13 +1,13 @@
 <?php
 
-namespace Zit;
+namespace Zit\Fixture;
 
-class TestObj
+class TestObjWithMissingArgument
 {
     public $name;
     public $instance;
 
-    public function __construct($name)
+    public function __construct($name= null)
     {
         $this->name = $name;
     }

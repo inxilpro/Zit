@@ -1,6 +1,6 @@
 <?php
 
-namespace Zit;
+namespace Zit\Fixture;
 
 class TestTypedObj
 {

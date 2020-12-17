@@ -20,7 +20,7 @@
     },
     {
       "name": "David Lundgren",
-      "homepage": "https://davidscode.com/"
+      "homepage": "https://www.davidscode.com/"
     }
   ],
   "support": {
@@ -47,9 +47,9 @@
     "sebastian/phpcpd": "^4.1"
   },
   "scripts": {
-    "test": "@php vendor/bin/phpunit --colors=always",
-    "sniff": "@php vendor/bin/phpcs --standard=PSR12 src",
-    "phpcpd": "@php vendor/bin/phpcpd src tests",
-    "phpstan": "@php -d memory_limit=-1 vendor/bin/phpstan analyse src"
+    "test": "phpunit --colors=always",
+    "sniff": "phpcs --standard=PSR12 src",
+    "phpcpd": "phpcpd src tests",
+    "phpstan": "phpstan analyse src --memory-limit=1"
   }
 }

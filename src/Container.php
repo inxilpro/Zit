@@ -9,13 +9,14 @@ namespace Zit;
 
 use Psr\Container\ContainerInterface;
 use Zit\Exception\NotFoundException;
+use Serializable;
 
 /**
  * Zit Container
  *
  * @package Zit
  */
-class Container implements ContainerInterface
+class Container implements ContainerInterface, Serializable
 {
     protected const NO_ARGS = '_no_arguments';
 
@@ -44,7 +45,23 @@ class Container implements ContainerInterface
      */
     protected $resolver;
 
-    public function __construct($resolverClass = null)
+    public function serialize()
+    {
+        return serialize([
+            'resolver'    => get_class($this->resolver),
+            'definitions' => $this->definitions
+        ]);
+    }
+
+    public function unserialize($serialized)
+    {
+        $data              = unserialize($serialized);
+        $resolver          = $data['resolver'];
+        $this->resolver    = new $resolver($this);
+        $this->definitions = $data['definitions'];
+    }
+
+    public function __construct(string $resolverClass = null)
     {
         $resolverClass  = $resolverClass ?? Resolver::class;
         $this->resolver = new $resolverClass($this);
@@ -59,11 +76,13 @@ class Container implements ContainerInterface
     /**
      * Handles magic methods
      *
-     * @param       $name
-     * @param array $arguments
+     * @param string $name
+     * @param array  $arguments
+     *
      * @return mixed
+     * @throws Exception\Container
      */
-    public function __call($name, $arguments = array())
+    public function __call(string $name, $arguments = array())
     {
         // Parse function name
         preg_match_all('/_?([A-Z][a-z0-9]*|[a-z0-9]+)/', $name, $parts);
@@ -93,7 +112,8 @@ class Container implements ContainerInterface
         array_unshift($arguments, $key);
 
         // Call method if exists
-        if (method_exists($this, $method)) {
+        if ($method && method_exists($this, $method)) {
+            /* @phpstan-ignore-next-line */
             return call_user_func_array(array($this, $method), $arguments);
         }
 
@@ -119,8 +139,8 @@ class Container implements ContainerInterface
     /**
      * Set a factory in the container (always creates a fresh item)
      *
-     * @param string    $name
-     * @param \callable $callable
+     * @param string   $name
+     * @param callable $callable
      * @return $this
      */
     public function setFactory($name, callable $callable)
@@ -176,7 +196,9 @@ class Container implements ContainerInterface
      * Get a new item (run instantiation function regardless of cache)
      *
      * @param string $name
+     *
      * @return mixed
+     * @throws \ReflectionException
      */
     public function fresh($name)
     {
