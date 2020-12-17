@@ -44,6 +44,7 @@ jobs:
         run: vendor/bin/phpunit --coverage-clover clover.xml
 
       - name: Coveralls
+        if: matrix.analysis
         uses: coverallsapp/github-action@master
         with:
             github-token: ${{ secrets.GITHUB_TOKEN }}
