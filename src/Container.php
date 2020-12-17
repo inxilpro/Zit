@@ -45,22 +45,6 @@ class Container implements ContainerInterface, Serializable
      */
     protected $resolver;
 
-    public function serialize()
-    {
-        return serialize([
-            'resolver'    => get_class($this->resolver),
-            'definitions' => $this->definitions
-        ]);
-    }
-
-    public function unserialize($serialized)
-    {
-        $data              = unserialize($serialized);
-        $resolver          = $data['resolver'];
-        $this->resolver    = new $resolver($this);
-        $this->definitions = $data['definitions'];
-    }
-
     public function __construct(string $resolverClass = null)
     {
         $resolverClass  = $resolverClass ?? Resolver::class;
@@ -119,6 +103,28 @@ class Container implements ContainerInterface, Serializable
 
         // Throw exception on miss
         throw new \InvalidArgumentException(sprintf('Method "%s" does not exist.', $method));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function serialize()
+    {
+        return serialize([
+            'resolver'    => get_class($this->resolver),
+            'definitions' => $this->definitions
+        ]);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function unserialize($serialized)
+    {
+        $data              = unserialize($serialized);
+        $resolver          = $data['resolver'];
+        $this->resolver    = new $resolver($this);
+        $this->definitions = $data['definitions'];
     }
 
     /**
