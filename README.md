@@ -7,6 +7,14 @@
 
 Zit is a simple dependency injector based heavily on Pimple.  It aims to provide the same simplicity as Pimple while offering a slightly more robust object interface.
 
+## ⚠️ Use `syberisle/zit` Instead
+
+This package has been updated and replaced by [`syberisle/zit`](https://github.com/SyberIsle/Zit). Please upgrade to that to get the latest updates and improvements.
+
+
+
+# Original README
+
 ## Installation
 
 Zit is available via Composer:
